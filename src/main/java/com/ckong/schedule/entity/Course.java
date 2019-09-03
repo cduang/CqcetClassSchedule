@@ -1,6 +1,8 @@
 package com.ckong.schedule.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * 课程bean
@@ -15,6 +17,7 @@ public class Course {
     private String teacher;
     private Integer classTime;
     private String weekRange;
+    private LocalDateTime timeStamp;
 
     public Course(){}
 
@@ -26,13 +29,15 @@ public class Course {
      * @param teacher 授课教师
      * @param classTime 上课时间
      */
-    public Course(String courseName, String classRoom, String dayOfWeek, String teacher, Integer classTime, String weekRange) {
+    public Course(String courseName, String classRoom, String dayOfWeek, String teacher, Integer classTime,
+                  String weekRange, LocalDateTime timeStamp) {
         this.courseName = courseName;
         this.classRoom = classRoom;
         this.dayOfWeek = dayOfWeek;
         this.teacher = teacher;
         this.classTime = classTime;
         this.weekRange = weekRange;
+        this.timeStamp = timeStamp;
     }
 
     public Integer getCourseId() {
@@ -91,7 +96,13 @@ public class Course {
         this.weekRange = weekRange;
     }
 
+    public LocalDateTime getTimeStamp() {
+        return timeStamp;
+    }
 
+    public void setTimeStamp(LocalDateTime timeStamp) {
+        this.timeStamp = timeStamp;
+    }
 
     @Override
     public String toString() {
@@ -103,6 +114,7 @@ public class Course {
                 ", teacher='" + teacher + '\'' +
                 ", classTime=" + classTime +
                 ", weekRange='" + weekRange + '\'' +
+                ", timeStamp=" + timeStamp +
                 '}';
     }
 }

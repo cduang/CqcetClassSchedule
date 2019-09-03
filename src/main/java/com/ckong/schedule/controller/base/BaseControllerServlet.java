@@ -2,9 +2,8 @@ package com.ckong.schedule.controller.base;
 
 
 import com.alibaba.fastjson.JSON;
-import com.ckong.schedule.controller.resdata.BaseResponseData;
-import com.ckong.schedule.controller.resdata.FailResponseDataImpl;
-
+import com.alibaba.fastjson.JSONObject;
+import com.ckong.schedule.utils.ResponseJson;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -42,8 +41,8 @@ public abstract class BaseControllerServlet extends HttpServlet {
         try {
             invokeMethod = this.getClass().getMethod(parameter, HttpServletRequest.class, HttpServletResponse.class);
         } catch (NoSuchMethodException e) {
-            FailResponseDataImpl res = new FailResponseDataImpl("error");
-            res.setErrorMessage("您所调用的method方法不存在");
+            ResponseJson res = new ResponseJson();
+            res.setMessage("您所调用的方法名不存在: " + parameter);
             Writer writer = new OutputStreamWriter(resp.getOutputStream());
             try (PrintWriter out = new PrintWriter(writer)) {
                 out.print(JSON.toJSONString(res));
@@ -54,8 +53,9 @@ public abstract class BaseControllerServlet extends HttpServlet {
         try {
             invokeMethod.setAccessible(true);
 
-            BaseResponseData<?> result = (BaseResponseData<?>)invokeMethod.invoke(this, req, resp);
-            String str = JSON.toJSONString(result);
+            ResponseJson result = (ResponseJson) invokeMethod.invoke(this, req, resp);
+            System.out.println("Start....");
+            String str = JSONObject.toJSONString(result);
             Writer writer = new OutputStreamWriter(resp.getOutputStream());
 
             try (PrintWriter out = new PrintWriter(writer)) {

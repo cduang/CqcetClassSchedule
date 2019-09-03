@@ -24,5 +24,11 @@ public interface ICourseService {
      */
     boolean addCourse(Course course, String userId) throws SQLException;
 
+    /**
+     *
+     * @param userId
+     * @return
+     * @throws SQLException
+     */
     Map<String, List<Course>> finUserAllCourseById(String userId) throws SQLException;
 }

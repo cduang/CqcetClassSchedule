@@ -1,10 +1,10 @@
 package com.ckong.schedule.controller;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.ckong.schedule.controller.base.BaseControllerServlet;
-import com.ckong.schedule.controller.resdata.BaseResponseData;
-import com.ckong.schedule.controller.resdata.FailResponseDataImpl;
-import com.ckong.schedule.controller.resdata.SuccessResponseDataImpl;
+import com.ckong.schedule.utils.ResponseJson;
 import com.ckong.schedule.entity.Course;
 import com.ckong.schedule.entity.User;
 import com.ckong.schedule.exceptions.GetClassScheduleNetWorkException;
@@ -35,7 +35,7 @@ public class UserServlet extends BaseControllerServlet {
      * @param resp Http响应
      * @return 处理结果
      */
-    public BaseResponseData<?> login(HttpServletRequest req, HttpServletResponse resp) {
+    public ResponseJson login(HttpServletRequest req, HttpServletResponse resp) {
 
         User requestUser = new User();
         requestUser.setUserId(req.getParameter("username"));
@@ -43,8 +43,7 @@ public class UserServlet extends BaseControllerServlet {
         requestUser.setLocationSchool(
                 new String(req.getParameter("location_school").getBytes(), StandardCharsets.UTF_8));
 
-        BaseResponseData<Map<String, List<Course>>> res = new SuccessResponseDataImpl<>();
-        FailResponseDataImpl failRes = new FailResponseDataImpl("error");
+        ResponseJson json = new ResponseJson();
 
         switch (isRegister(requestUser)) {
 
@@ -53,48 +52,60 @@ public class UserServlet extends BaseControllerServlet {
                     try {
 
                         if (this.register(requestUser)) {
-                            res.setData(ServiceFactory.getCourserServiceInstance()
-                                    .finUserAllCourseById(requestUser.getUserId()));
-                            return res;
+                                json.setMessage("注册并登录成功");
+                                json.setStatus("ok");
+                                json.setData((JSONObject)JSON.toJSON(ServiceFactory.getCourserServiceInstance()
+                                        .finUserAllCourseById(requestUser.getUserId())));
+                                return json;
                         } else {
-                            failRes.setErrorMessage("登录失败原因未知");
-                            return failRes;
+                            json.setStatus("error");
+                            json.setMessage("登录失败原因未知");
+                            return json;
                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
-                        failRes.setErrorMessage("获得数据失败,请稍后重试");
-                        return failRes;
+                        json.setStatus("error");
+                        json.setMessage("获得数据失败,请稍后重试");
+                        return json;
                     }
                 } catch (UserNameOrPasswordException e) {
-                    failRes.setErrorMessage("账号或密码错误请稍后重试");
-                    return failRes;
+                    json.setStatus("error");
+                    json.setMessage("账号或密码错误请稍后重试");
+                    return json;
                 } catch (GetClassScheduleNetWorkException e) {
-                    failRes.setErrorMessage("网络超时请稍后重试");
-                    return failRes;
+                    json.setStatus("error");
+                    json.setMessage("网络超时请稍后重试");
+                    return json;
                 }
             }
             case 3: {
-                failRes.setErrorMessage("密码错误");
-                return failRes;
+                json.setStatus("error");
+                json.setMessage("密码错误");
+                return json;
             }
             case 5: {
-                failRes.setErrorMessage("学校填写错误");
-                return failRes;
+                json.setStatus("error");
+                json.setMessage("学校填写错误");
+                return json;
             }
             case 3 + 5: {
-                failRes.setErrorMessage("学校和密码都填写错误");
-                return failRes;
+                json.setStatus("error");
+                json.setMessage("学校和密码都填写错误");
+                return json;
             }
 
             default: {
                 try {
-                    res.setData(ServiceFactory.getCourserServiceInstance()
-                            .finUserAllCourseById(requestUser.getUserId()));
-                    return res;
+                    json.setMessage("登录成功");
+                    json.setStatus("ok");
+                    json.setData((JSONObject)JSON.toJSON(ServiceFactory.getCourserServiceInstance()
+                            .finUserAllCourseById(requestUser.getUserId())));
+                    return json;
                 } catch (SQLException e) {
                     e.printStackTrace();
-                    failRes.setErrorMessage("获得数据失败,请稍后重试");
-                    return failRes;
+                    json.setMessage("error");
+                    json.setMessage("获得数据失败,请稍后重试");
+                    return json;
                 }
             }
         }
@@ -102,7 +113,6 @@ public class UserServlet extends BaseControllerServlet {
 
     /**
      * 用户注册
-     *
      * @param registerUser 注册的User对象
      */
     private boolean register(User registerUser) throws UserNameOrPasswordException

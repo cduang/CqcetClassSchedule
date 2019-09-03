@@ -5,10 +5,11 @@ import com.ckong.schedule.entity.ClassSchedule;
 import com.ckong.schedule.entity.Course;
 import com.ckong.schedule.utils.DbUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +34,7 @@ public class ClassScheduleDaoImpl implements IClassScheduleDao {
     public Map<String, List<Course>> findCoursesById(String userId) throws SQLException {
 
         String sql = " SELECT course.course_id, course.course_name, course.class_room, day_of_week, teacher, " +
-                " class_time ,course.week_range FROM course"
+                " class_time ,course.week_range, time_stamp FROM course "
                 + " WHERE course.course_id IN (SELECT  course_id FROM class_schedule WHERE class_schedule.user_id = ?) ";
         ResultSet result = null;
         Map<String, List<Course>> courses = new LinkedHashMap<>();
@@ -59,6 +60,8 @@ public class ClassScheduleDaoImpl implements IClassScheduleDao {
                     course.setTeacher(result.getString("teacher"));
                     course.setClassTime(result.getInt("class_time"));
                     course.setWeekRange(result.getString("week_range"));
+                    course.setTimeStamp(
+                            getDateTimeOfTimeStamp(result.getTimestamp("time_stamp").getTime()));
 
                     courses.get((course.getDayOfWeek())).add(course);
                 }
@@ -86,4 +89,17 @@ public class ClassScheduleDaoImpl implements IClassScheduleDao {
             DbUtil.close(this.pstmt);
         }
     }
+
+    /**
+     * 将时间时间戳转换成本地时间
+     * @param timestamp 时间戳
+     * @return LocalDateTime类类型的日期时间
+     */
+    private LocalDateTime getDateTimeOfTimeStamp(long timestamp) {
+
+        Instant instant = Instant.ofEpochMilli(timestamp);
+        ZoneId zoneId = ZoneId.systemDefault();
+        return LocalDateTime.ofInstant(instant, zoneId);
+    }
+
 }
