@@ -35,5 +35,11 @@ public interface IUserService {
      */
     User findUserById (String userId) throws SQLException;
 
+    /**
+     * 检测用户是否存在
+     * @param userId
+     * @return
+     * @throws SQLException
+     */
     boolean isUserExist (String userId) throws SQLException;
 }

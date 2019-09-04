@@ -5,6 +5,7 @@ import com.ckong.schedule.entity.ClassSchedule;
 import com.ckong.schedule.entity.Course;
 import com.ckong.schedule.service.ICourseService;
 import com.ckong.schedule.utils.DbUtil;
+import com.ckong.schedule.utils.
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -48,10 +49,41 @@ public class CourseServiceImpl implements ICourseService {
 
         try {
              courses = DaoFactory.getClassScheduDaoInstance(conn).findCoursesById(userId);
+
+
         } finally {
             DbUtil.close(conn);
         }
 
         return courses;
+    }
+
+    @Override
+    public boolean insertBatch(Map<Integer, List<Course>> newCourses, String userId) {
+
+        Connection conn = DbUtil.getConnection();
+        try {
+            DaoFactory.getCourseDaoInstance(conn).insertBatch(newCourses, userId);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * 从课程集合找出最新的课程
+     * @return
+     */
+    private Map<String, List<Course>> getUpToDateCourse(Map<String, List<Course>> target) {
+
+        for (Map.Entry<String, List<Course>> entry : target.entrySet()) {
+            for (Course course: entry.getValue()) {
+                System.out.println()
+            }
+        }
+
+        return null;
     }
 }

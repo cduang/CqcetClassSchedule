@@ -25,10 +25,18 @@ public interface ICourseService {
     boolean addCourse(Course course, String userId) throws SQLException;
 
     /**
-     *
-     * @param userId
-     * @return
-     * @throws SQLException
+     * 此方法用于查找用户的的全部课程
+     * @param userId 用户账号
+     * @return 课程集合
+     * @throws SQLException sql异常
      */
     Map<String, List<Course>> finUserAllCourseById(String userId) throws SQLException;
+
+
+    /**
+     * 批量添加课程
+     * @param newCourses 多个课程
+     * @return 成功true, 反之false
+     */
+    boolean insertBatch(Map<Integer, List<Course>> newCourses, String userId);
 }
