@@ -3,13 +3,10 @@ package com.ckong.schedule.dao.impl;
 import com.ckong.schedule.dao.IClassScheduleDao;
 import com.ckong.schedule.entity.ClassSchedule;
 import com.ckong.schedule.entity.Course;
+import com.ckong.schedule.utils.DateTimeUtil;
 import com.ckong.schedule.utils.DbUtil;
 
-
 import java.sql.*;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +58,7 @@ public class ClassScheduleDaoImpl implements IClassScheduleDao {
                     course.setClassTime(result.getInt("class_time"));
                     course.setWeekRange(result.getString("week_range"));
                     course.setTimeStamp(
-                            getDateTimeOfTimeStamp(result.getTimestamp("time_stamp").getTime()));
+                            DateTimeUtil.timeStampToLocalDateTime(result.getTimestamp("time_stamp")));
 
                     courses.get((course.getDayOfWeek())).add(course);
                 }
@@ -89,17 +86,4 @@ public class ClassScheduleDaoImpl implements IClassScheduleDao {
             DbUtil.close(this.pstmt);
         }
     }
-
-    /**
-     * 将时间时间戳转换成本地时间
-     * @param timestamp 时间戳
-     * @return LocalDateTime类类型的日期时间
-     */
-    private LocalDateTime getDateTimeOfTimeStamp(long timestamp) {
-
-        Instant instant = Instant.ofEpochMilli(timestamp);
-        ZoneId zoneId = ZoneId.systemDefault();
-        return LocalDateTime.ofInstant(instant, zoneId);
-    }
-
 }

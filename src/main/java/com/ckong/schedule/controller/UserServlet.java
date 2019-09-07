@@ -35,7 +35,7 @@ public class UserServlet extends BaseControllerServlet {
      * @param resp Http响应
      * @return 处理结果
      */
-    public ResponseJson login(HttpServletRequest req, HttpServletResponse resp) {
+    public ResponseJson login(HttpServletRequest req, HttpServletResponse resp) throws SQLException{
 
         User requestUser = new User();
         requestUser.setUserId(req.getParameter("username"));
@@ -50,48 +50,43 @@ public class UserServlet extends BaseControllerServlet {
             case 1: {
                 try {
                     try {
-
                         if (this.register(requestUser)) {
                                 json.setMessage("注册并登录成功");
                                 json.setStatus("ok");
                                 json.setData((JSONObject)JSON.toJSON(ServiceFactory.getCourserServiceInstance()
                                         .finUserAllCourseById(requestUser.getUserId())));
-                                return json;
                         } else {
                             json.setStatus("error");
                             json.setMessage("登录失败原因未知");
-                            return json;
                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
                         json.setStatus("error");
                         json.setMessage("获得数据失败,请稍后重试");
-                        return json;
                     }
                 } catch (UserNameOrPasswordException e) {
                     json.setStatus("error");
                     json.setMessage("账号或密码错误请稍后重试");
-                    return json;
                 } catch (GetClassScheduleNetWorkException e) {
                     json.setStatus("error");
                     json.setMessage("网络超时请稍后重试");
-                    return json;
                 }
+                break;
             }
             case 3: {
                 json.setStatus("error");
                 json.setMessage("密码错误");
-                return json;
+                break;
             }
             case 5: {
                 json.setStatus("error");
                 json.setMessage("学校填写错误");
-                return json;
+                break;
             }
             case 3 + 5: {
                 json.setStatus("error");
                 json.setMessage("学校和密码都填写错误");
-                return json;
+                break;
             }
 
             default: {
@@ -100,15 +95,14 @@ public class UserServlet extends BaseControllerServlet {
                     json.setStatus("ok");
                     json.setData((JSONObject)JSON.toJSON(ServiceFactory.getCourserServiceInstance()
                             .finUserAllCourseById(requestUser.getUserId())));
-                    return json;
                 } catch (SQLException e) {
                     e.printStackTrace();
                     json.setMessage("error");
                     json.setMessage("获得数据失败,请稍后重试");
-                    return json;
                 }
             }
         }
+        return json;
     }
 
     /**
@@ -116,16 +110,12 @@ public class UserServlet extends BaseControllerServlet {
      * @param registerUser 注册的User对象
      */
     private boolean register(User registerUser) throws UserNameOrPasswordException
-            , GetClassScheduleNetWorkException {
+            , GetClassScheduleNetWorkException, SQLException {
 
         Map<Integer, List<Course>> courses = this.getClassSchedule(registerUser.getUserId()
                 , registerUser.getPassword());
-        try {
-            return ServiceFactory.getUserServiceInstance().addNewUser(registerUser, courses);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+
+        return ServiceFactory.getUserServiceInstance().addNewUser(registerUser, courses);
     }
 
     private Map<Integer, List<Course>> getClassSchedule(String userName, String password)
@@ -142,25 +132,21 @@ public class UserServlet extends BaseControllerServlet {
      * @param requestUser 从客户端传来的User对象
      * @return 1:账户不相等, 3:密码不相等, 5:学校不相等
      */
-    private int isRegister(User requestUser) {
+    private int isRegister(User requestUser) throws SQLException {
 
         int result = 0;
-        try {
-            User findUser = ServiceFactory.getUserServiceInstance().
-                    findUserById(requestUser.getUserId());
 
-            if (!requestUser.getUserId().equals(findUser.getUserId())) {
-                return 1;
-            }
-            if (!requestUser.getPassword().equals(findUser.getPassword())) {
-                result += 3;
-            }
-            if (!requestUser.getLocationSchool().equals(findUser.getLocationSchool())) {
-                result += 5;
-            }
+        User findUser = ServiceFactory.getUserServiceInstance().
+                findUserById(requestUser.getUserId());
 
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (!requestUser.getUserId().equals(findUser.getUserId())) {
+            return 1;
+        }
+        if (!requestUser.getPassword().equals(findUser.getPassword())) {
+            result += 3;
+        }
+        if (!requestUser.getLocationSchool().equals(findUser.getLocationSchool())) {
+            result += 5;
         }
         return result;
     }

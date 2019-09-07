@@ -5,12 +5,16 @@ import com.ckong.schedule.entity.ClassSchedule;
 import com.ckong.schedule.entity.Course;
 import com.ckong.schedule.service.ICourseService;
 import com.ckong.schedule.utils.DbUtil;
-import com.ckong.schedule.utils.
+import com.ckong.schedule.utils.DateTimeUtil;
+import org.apache.http.client.utils.DateUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * ICourseService接口的实现
@@ -32,9 +36,6 @@ public class CourseServiceImpl implements ICourseService {
                 schedule.setCourseId(courseId);
                 return DaoFactory.getClassScheduDaoInstance(conn).insertSchedule(schedule);
             }
-
-        } catch (SQLException e) {
-            throw e;
         } finally {
             DbUtil.close(conn);
         }
@@ -49,6 +50,7 @@ public class CourseServiceImpl implements ICourseService {
 
         try {
              courses = DaoFactory.getClassScheduDaoInstance(conn).findCoursesById(userId);
+             this.getUpToDateCourse(courses);
 
 
         } finally {
@@ -74,16 +76,22 @@ public class CourseServiceImpl implements ICourseService {
 
     /**
      * 从课程集合找出最新的课程
-     * @return
+     * @return 最新的课程
      */
     private Map<String, List<Course>> getUpToDateCourse(Map<String, List<Course>> target) {
 
-        for (Map.Entry<String, List<Course>> entry : target.entrySet()) {
-            for (Course course: entry.getValue()) {
-                System.out.println()
-            }
-        }
+        target.forEach((dayOfWeek, courseList) -> {
 
+            Optional<Course> opt = courseList.stream()
+                    .max(Comparator.comparing(Course::getTimeStamp));
+            // 清除
+            opt.ifPresent((maxStampCourse) ->
+                courseList.removeIf(course -> !maxStampCourse.getTimeStamp()
+                        .equals(course.getTimeStamp())));
+
+        });
+
+        target.forEach((key, values) -> values.forEach(System.out::println));
         return null;
     }
 }

@@ -1,5 +1,6 @@
-package utils;
+package com.ckong.schedule.utils;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -60,6 +61,16 @@ public class DateTimeUtil {
                 localDateTime.format(DateTimeFormatter.ofPattern(DEFAULT_DATE_PATTERN));
 
     }
+    public static String timToString(final Timestamp timestamp, final String ...pattern) {
+
+        Objects.requireNonNull(timestamp);
+        LocalDateTime time = timeStampToLocalDateTime(timestamp);
+
+        return Objects.nonNull(pattern)  && pattern.length > 0 ?
+                time.format(DateTimeFormatter.ofPattern(pattern[0])) :
+                time.format(DateTimeFormatter.ofPattern(DEFAULT_DATE_PATTERN));
+
+    }
 
     /**
      * 比较时间日期
@@ -80,13 +91,13 @@ public class DateTimeUtil {
         Objects.requireNonNull(second, "secondDate为空");
         return first.compareTo(second);
     }
-    public static int compore(final LocalTime first, final LocalTime second) {
+    public static int compare(final LocalTime first, final LocalTime second) {
 
         Objects.requireNonNull(first, "firstTime为空");
         Objects.requireNonNull(second, "secondTime为空");
         return first.compareTo(second);
     }
-    public static int compore(final Date first, final LocalDateTime local) {
+    public static int compare(final Date first, final LocalDateTime local) {
 
         Objects.requireNonNull(first, "firstDate为空");
         Objects.requireNonNull(local, "secondDateTime为空");
@@ -94,7 +105,7 @@ public class DateTimeUtil {
         return dateToLocalLocalDateTime(first).compareTo(local);
     }
 
-    public static int compore(final LocalDateTime first, final Date second) {
+    public static int compare(final LocalDateTime first, final Date second) {
         Objects.requireNonNull(first, "firstDateTime为空");
         Objects.requireNonNull(second, "Date Second为空");
 
@@ -114,5 +125,19 @@ public class DateTimeUtil {
         Instant instant = date.toInstant();
         return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
+
+    /**
+     * 将TimeStamp转换成LocalDateTime
+     * @param timestamp 时间戳
+     * @return 转换后的结果
+     */
+    public static LocalDateTime timeStampToLocalDateTime(final Timestamp timestamp) {
+
+        Objects.requireNonNull(timestamp, "TimStamp为空");
+
+        Instant instant = timestamp.toInstant();
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+    }
+
 
 }
